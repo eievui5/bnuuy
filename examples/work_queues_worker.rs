@@ -1,14 +1,14 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-two-python.html. Start one
 // or more of this example in shells, then run the work_queues_new_task example
 // in another.
-use amiquip::{Connection, ConsumerMessage, ConsumerOptions, QueueDeclareOptions, Result};
+use bnuuy::{Connection, ConsumerMessage, ConsumerOptions, QueueDeclareOptions, Result};
 use std::thread;
 use std::time::Duration;
 
 const TASK_QUEUE: &str = "task_queue";
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;
@@ -26,7 +26,7 @@ fn main() -> Result<()> {
     )?;
 
     // Set QOS to only send us 1 message at a time.
-    channel.qos(0, 1, false)?;
+    channel.set_qos(1, false)?;
 
     // Start a consumer.
     let consumer = queue.consume(ConsumerOptions::default())?;

@@ -1,10 +1,10 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-five-python.html. Start the
 // topics_receive_logs example in one shell, then run this example in another.
-use amiquip::{Connection, ExchangeDeclareOptions, ExchangeType, Publish, Result};
+use bnuuy::{Connection, ExchangeDeclareOptions, ExchangeType, Publish, Result};
 use std::env;
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;

@@ -13,9 +13,9 @@ use amq_protocol::protocol::exchange::AMQPMethod as AmqpExchange;
 use amq_protocol::protocol::queue::AMQPMethod as AmqpQueue;
 use amq_protocol::protocol::{AMQPClass, AMQPHardError};
 use crossbeam_channel::{Sender, TrySendError};
-use log::{debug, error, trace, warn};
 use snafu::OptionExt;
 use std::collections::hash_map::Entry;
+use tracing::{debug, error, trace, warn};
 
 use super::content_collector::CollectorResult;
 use super::{
@@ -40,7 +40,7 @@ fn slot_remove(inner: &mut Inner, channel_id: u16) -> Result<ChannelSlot> {
         .context(ReceivedFrameWithBogusChannelIdSnafu { channel_id })
 }
 
-fn slot_get(inner: &mut Inner, channel_id: u16) -> Result<&ChannelSlot> {
+fn slot_get(inner: &Inner, channel_id: u16) -> Result<&ChannelSlot> {
     inner
         .chan_slots
         .get(channel_id)
@@ -73,19 +73,19 @@ fn send<T: Send + Sync + 'static>(tx: &Sender<T>, item: T) -> Result<()> {
 
 // When we set up a return listener, it's just a crossbeam channel. If it gets dropped,
 // we don't want to error; just start discarding returned messages.
-fn try_send_return(slot: &mut ChannelSlot, return_: Return) {
-    let return_ = if let Some(tx) = &slot.return_handler {
-        match tx.try_send(return_) {
+fn try_send_return(slot: &mut ChannelSlot, ret: Return) {
+    let ret = if let Some(tx) = &slot.return_handler {
+        match tx.try_send(ret) {
             Ok(()) => return,
-            Err(TrySendError::Full(return_)) | Err(TrySendError::Disconnected(return_)) => {
+            Err(TrySendError::Full(ret)) | Err(TrySendError::Disconnected(ret)) => {
                 slot.return_handler = None;
-                return_
+                ret
             }
         }
     } else {
-        return_
+        ret
     };
-    warn!("discarding returned data {:?}", return_);
+    warn!("discarding returned data {:?}", ret);
 }
 
 // When we set up a pub confirm listener, it's just a crossbeam channel. If it gets dropped,
@@ -128,7 +128,7 @@ impl ConnectionState {
         error!("{} - closing connection", reply_text);
         let close = ConnectionClose {
             reply_code: reply_code.get_id(),
-            reply_text,
+            reply_text: reply_text.into(),
             class_id: 0,
             method_id: 0,
         };
@@ -157,13 +157,15 @@ impl ConnectionState {
             }
             // We never expect to see a protocl header (we send it to begin the connection)
             // or a heartbeat on a non-0 channel.
-            AMQPFrame::ProtocolHeader | AMQPFrame::Heartbeat(_) => return FrameUnexpectedSnafu.fail(),
+            AMQPFrame::ProtocolHeader(_) | AMQPFrame::Heartbeat(_) => {
+                return FrameUnexpectedSnafu.fail()
+            }
             // Server-initiated connection close.
             AMQPFrame::Method(0, AMQPClass::Connection(AmqpConnection::Close(close))) => {
                 inner.push_method(0, AmqpConnection::CloseOk(ConnectionCloseOk {}));
                 inner.seal_writes();
                 let reply_code = close.reply_code;
-                let message = close.reply_text.clone();
+                let message = close.reply_text.to_string();
                 let make_err = || Error::ServerClosedConnection {
                     code: reply_code,
                     message: message.clone(),
@@ -198,7 +200,7 @@ impl ConnectionState {
             // Server is blocking publishes due to an alarm on its side (e.g., low mem)
             AMQPFrame::Method(0, AMQPClass::Connection(AmqpConnection::Blocked(blocked))) => {
                 warn!("server has blocked connection; reason = {}", blocked.reason);
-                let note = ConnectionBlockedNotification::Blocked(blocked.reason);
+                let note = ConnectionBlockedNotification::Blocked(blocked.reason.to_string());
                 try_send_blocked(ch0_slot, note);
             }
             // Server has unblocked publishes
@@ -224,7 +226,7 @@ impl ConnectionState {
                 let make_err = || Error::ServerClosedChannel {
                     channel_id: n,
                     code: close.reply_code,
-                    message: close.reply_text.clone(),
+                    message: close.reply_text.to_string(),
                 };
                 send(&slot.tx, Err(make_err()))?;
                 for (_, tx) in slot.consumers.drain() {
@@ -253,7 +255,7 @@ impl ConnectionState {
             }
             // Server ack for consume request.
             AMQPFrame::Method(n, AMQPClass::Basic(AmqpBasic::ConsumeOk(consume_ok))) => {
-                let consumer_tag = consume_ok.consumer_tag;
+                let consumer_tag = consume_ok.consumer_tag.to_string();
                 let slot = slot_get_mut(inner, n)?;
                 match slot.consumers.entry(consumer_tag.clone()) {
                     Entry::Occupied(_) => {
@@ -274,7 +276,7 @@ impl ConnectionState {
             AMQPFrame::Method(n, AMQPClass::Basic(AmqpBasic::Cancel(cancel))) => {
                 let consumer_tag = cancel.consumer_tag;
                 let slot = slot_get_mut(inner, n)?;
-                if let Some(tx) = slot.consumers.remove(&consumer_tag) {
+                if let Some(tx) = slot.consumers.remove(consumer_tag.as_str()) {
                     send(&tx, ConsumerMessage::ServerCancelled)?;
                 }
                 if !cancel.nowait {
@@ -284,7 +286,7 @@ impl ConnectionState {
             // Server ack for client-initiated consumer cancel.
             AMQPFrame::Method(n, AMQPClass::Basic(AmqpBasic::CancelOk(cancel_ok))) => {
                 let slot = slot_get_mut(inner, n)?;
-                let consumer = slot.consumers.remove(&cancel_ok.consumer_tag);
+                let consumer = slot.consumers.remove(cancel_ok.consumer_tag.as_str());
                 send(
                     &slot.tx,
                     Ok(ChannelMessage::Method(AMQPClass::Basic(
@@ -301,9 +303,9 @@ impl ConnectionState {
                 slot.collector.collect_deliver(deliver)?;
             }
             // Server beginning return of undeliverable content.
-            AMQPFrame::Method(n, AMQPClass::Basic(AmqpBasic::Return(return_))) => {
+            AMQPFrame::Method(n, AMQPClass::Basic(AmqpBasic::Return(ret))) => {
                 let slot = slot_get_mut(inner, n)?;
-                slot.collector.collect_return(return_)?;
+                slot.collector.collect_return(ret)?;
             }
             // Server ack for get (message incoming).
             AMQPFrame::Method(n, AMQPClass::Basic(AmqpBasic::GetOk(get_ok))) => {
@@ -395,17 +397,16 @@ impl ConnectionState {
                 if let Some(collected) = slot.collector.collect_header(*header)? {
                     match collected {
                         CollectorResult::Delivery((consumer_tag, delivery)) => {
-                            let tx =
-                                slot.consumers
-                                    .get(&consumer_tag)
-                                    .context(UnknownConsumerTagSnafu {
-                                        channel_id: n,
-                                        consumer_tag,
-                                    })?;
+                            let tx = slot.consumers.get(&consumer_tag).context(
+                                UnknownConsumerTagSnafu {
+                                    channel_id: n,
+                                    consumer_tag,
+                                },
+                            )?;
                             send(tx, ConsumerMessage::Delivery(delivery))?;
                         }
-                        CollectorResult::Return(return_) => {
-                            try_send_return(slot, return_);
+                        CollectorResult::Return(ret) => {
+                            try_send_return(slot, ret);
                         }
                         CollectorResult::Get(get) => {
                             send(&slot.tx, Ok(ChannelMessage::GetOk(Box::new(Some(get)))))?;
@@ -419,17 +420,16 @@ impl ConnectionState {
                 if let Some(collected) = slot.collector.collect_body(body)? {
                     match collected {
                         CollectorResult::Delivery((consumer_tag, delivery)) => {
-                            let tx =
-                                slot.consumers
-                                    .get(&consumer_tag)
-                                    .context(UnknownConsumerTagSnafu {
-                                        channel_id: n,
-                                        consumer_tag,
-                                    })?;
+                            let tx = slot.consumers.get(&consumer_tag).context(
+                                UnknownConsumerTagSnafu {
+                                    channel_id: n,
+                                    consumer_tag,
+                                },
+                            )?;
                             send(tx, ConsumerMessage::Delivery(delivery))?;
                         }
-                        CollectorResult::Return(return_) => {
-                            try_send_return(slot, return_);
+                        CollectorResult::Return(ret) => {
+                            try_send_return(slot, ret);
                         }
                         CollectorResult::Get(get) => {
                             send(&slot.tx, Ok(ChannelMessage::GetOk(Box::new(Some(get)))))?;

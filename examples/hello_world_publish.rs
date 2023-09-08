@@ -1,9 +1,9 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-one-python.html. Start the
 // hello_world_consume example in one shell, and run this in another.
-use amiquip::{Connection, Exchange, Publish, Result};
+use bnuuy::{Connection, Exchange, Publish, Result};
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;

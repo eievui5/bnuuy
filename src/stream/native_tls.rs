@@ -5,7 +5,7 @@ use native_tls::{HandshakeError, MidHandshakeTlsStream};
 use snafu::ResultExt;
 use std::io::{self, Read, Write};
 
-/// Newtype wrapper around a `native_tls::TlsConnector` to make it usable by amiquip's I/O loop.
+/// Newtype wrapper around a `native_tls::TlsConnector` to make it usable by bnuuy's I/O loop.
 pub struct TlsConnector(native_tls::TlsConnector);
 
 impl TlsConnector {

@@ -13,7 +13,7 @@ fn test_publish_empty() {
 
 #[test]
 fn test_declare() {
-    let name = "amiquip-test-declare";
+    let name = "bnuuy-test-declare";
 
     with_chan(|chan| {
         let ex1 = chan

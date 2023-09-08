@@ -35,10 +35,10 @@ impl ContentCollector {
         }
     }
 
-    pub(super) fn collect_return(&mut self, return_: AmqpReturn) -> Result<()> {
+    pub(super) fn collect_return(&mut self, ret: AmqpReturn) -> Result<()> {
         match self.kind.take() {
             None => {
-                self.kind = Some(Kind::Return(State::Start(return_)));
+                self.kind = Some(Kind::Return(State::Start(ret)));
                 Ok(())
             }
             Some(_) => FrameUnexpectedSnafu.fail(),
@@ -71,9 +71,9 @@ impl ContentCollector {
                 }
             },
             Some(Kind::Return(state)) => match state.collect_header(self.channel_id, header)? {
-                Content::Done(return_) => {
+                Content::Done(ret) => {
                     self.kind = None;
-                    Ok(Some(CollectorResult::Return(return_)))
+                    Ok(Some(CollectorResult::Return(ret)))
                 }
                 Content::NeedMore(state) => {
                     self.kind = Some(Kind::Return(state));
@@ -107,9 +107,9 @@ impl ContentCollector {
                 }
             },
             Some(Kind::Return(state)) => match state.collect_body(self.channel_id, body)? {
-                Content::Done(return_) => {
+                Content::Done(ret) => {
                     self.kind = None;
-                    Ok(Some(CollectorResult::Return(return_)))
+                    Ok(Some(CollectorResult::Return(ret)))
                 }
                 Content::NeedMore(state) => {
                     self.kind = Some(Kind::Return(state));
@@ -235,20 +235,14 @@ impl<T: ContentType> State<T> {
                 let body_size = header.body_size as usize;
                 buf.append(&mut body);
                 match buf.len().cmp(&body_size) {
-                    Ordering::Equal => {
-                        Ok(Content::Done(T::new(
-                            channel_id,
-                            start,
-                            buf,
-                            header.properties,
-                        )))
-                    },
-                    Ordering::Less => {
-                        Ok(Content::NeedMore(State::Body(start, header, buf)))
-                    }
-                    _ => {
-                        FrameUnexpectedSnafu.fail()
-                    }
+                    Ordering::Equal => Ok(Content::Done(T::new(
+                        channel_id,
+                        start,
+                        buf,
+                        header.properties,
+                    ))),
+                    Ordering::Less => Ok(Content::NeedMore(State::Body(start, header, buf))),
+                    _ => FrameUnexpectedSnafu.fail(),
                 }
             }
             State::Start(_) => FrameUnexpectedSnafu.fail(),

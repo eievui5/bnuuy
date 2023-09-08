@@ -3,8 +3,8 @@ use crate::errors::*;
 use crate::io_loop::{Channel0Handle, IoLoop};
 use crate::{Channel, FieldTable, IoStream, Sasl};
 use crossbeam_channel::Receiver;
-use log::debug;
 use std::thread::JoinHandle;
+use tracing::debug;
 
 #[cfg(feature = "native-tls")]
 use crate::TlsConnector;
@@ -23,7 +23,7 @@ pub enum ConnectionBlockedNotification {
     Unblocked,
 }
 
-/// Tuning parameters for the amiquip client.
+/// Tuning parameters for the bnuuy client.
 ///
 /// The options are solely used to control local behavior of the client. They are not part of the
 /// AMQP spec and are not communicated with the server in any way. For options that configure the
@@ -203,7 +203,7 @@ impl Connection {
     /// * `auth_mechanism` (partial); the only allowed value is `external`, and if this query
     /// parameter is given any username or password on the URL will be ignored.
     ///
-    /// Using `amqps` URLs requires amiquip to be built with the `native-tls` feature (which is
+    /// Using `amqps` URLs requires bnuuy to be built with the `native-tls` feature (which is
     /// enabled by default). The TLS-related RabbitMQ query parameters are not supported; use
     /// [`open_tls_stream`](#method.open_tls_stream) with a configured `TlsConnector` if you need
     /// control over the TLS configuration.
@@ -211,7 +211,7 @@ impl Connection {
     /// # Examples
     ///
     /// ```rust
-    /// use amiquip::{Auth, Connection, ConnectionOptions, ConnectionTuning, Result};
+    /// use bnuuy::{Auth, Connection, ConnectionOptions, ConnectionTuning, Result};
     /// use std::time::Duration;
     ///
     /// // Examples below assume a helper function to open a TcpStream from an address string with
@@ -304,7 +304,7 @@ impl Connection {
     /// * `version`
     ///
     /// It also typically includes a nested `FieldTable` under the key `capabilities` that
-    /// describes extensions supported by the server. Relevant capabilities to amiquip include:
+    /// describes extensions supported by the server. Relevant capabilities to bnuuy include:
     ///
     /// * `basic.nack` - required to use [`Delivery::nack`](struct.Delivery.html#method.nack)
     /// * `connection.blocked` - required for
@@ -361,12 +361,12 @@ impl Connection {
     /// [kind](struct.Error.html#method.kind) set to
     /// [`Error::IoThreadPanic`](enum.Error.html#variant.IoThreadPanic). (Note - the I/O
     /// thread _should not_ panic. If it does, please [file an
-    /// issue](https://github.com/jgallagher/amiquip/issues).) For this reason, applications that
+    /// issue](https://github.com/eievui5/bnuuy/issues).) For this reason, applications that
     /// want more detail about errors to separate the use of the connection from closing it. For
     /// example:
     ///
     /// ```rust
-    /// use amiquip::{Connection, Result};
+    /// use bnuuy::{Connection, Result};
     ///
     /// fn use_connection(connection: &mut Connection) -> Result<()> {
     ///     // ...do all the things...
@@ -548,7 +548,7 @@ mod amqp_url {
             // "amqp://host/" should have a vhost of Some(""). But we can't tell
             // the difference between these two with the url lib, so we'll just toss
             // out the latter. We now have no way of specifying a vhost of "".
-            if vhost != "" {
+            if !vhost.is_empty() {
                 options = options.virtual_host(percent_decode(vhost));
             }
 
@@ -600,6 +600,9 @@ mod amqp_url {
                         }
                         .fail();
                     }
+                }
+                "connection_name" => {
+                    options = options.connection_name(Some(v.to_string()));
                 }
                 parameter => {
                     return UrlUnsupportedParameterSnafu {

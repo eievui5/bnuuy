@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains several toy examples for amiquip:
+This directory contains several toy examples for bnuuy:
 
 * [RabbitMQ Tutorial Examples](#rabbitmq-tutorial-examples) - ports of RabbitMQ's introductory tutorials
 * [Publisher Confirm Example](#publisher-confirm-example) - example of enabling and using publisher confirms

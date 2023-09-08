@@ -1,12 +1,12 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-three-python.html. Start this
 // example in one shell, then run the pubsub_emit_log example in another.
-use amiquip::{
+use bnuuy::{
     Connection, ConsumerMessage, ConsumerOptions, ExchangeDeclareOptions, ExchangeType, FieldTable,
     QueueDeclareOptions, Result,
 };
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;
@@ -32,7 +32,7 @@ fn main() -> Result<()> {
     println!("created exclusive queue {}", queue.name());
 
     // Bind our queue to the logs exchange.
-    queue.bind(&exchange, "", FieldTable::new())?;
+    queue.bind(&exchange, "", FieldTable::default())?;
 
     // Start a consumer. Use no_ack: true so the server doesn't wait for us to ack
     // the messages it sends us.

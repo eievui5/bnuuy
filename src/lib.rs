@@ -1,17 +1,17 @@
-//! amiquip is a RabbitMQ client written in pure Rust.
+//! bnuuy is a RabbitMQ client written in pure Rust.
 //!
-//! amiquip supports most features of the AMQP spec and some RabbitMQ extensions (see a list of
+//! bnuuy supports most features of the AMQP spec and some RabbitMQ extensions (see a list of
 //! [currently unsupported features](#unsupported-features) below). It aims to be robust: problems
 //! on a channel or connection should lead to a relevant [error](enum.Error.html) being raised.
 //! Most errors, however, do result in effectively killing the channel or connection on which they
 //! occur.
 //!
 //! TLS support is enabled by default via the [native-tls](https://crates.io/crates/native-tls)
-//! crate. To enable disable TLS support at build time, disable amiquip's default features:
+//! crate. To enable disable TLS support at build time, disable bnuuy's default features:
 //!
 //! ```toml
 //! [dependencies]
-//! amiquip = { version = "0.4", default-features = false }
+//! bnuuy = { version = "0.4", default-features = false }
 //! ```
 //!
 //! If you disable TLS support, the methods `Connection::open`, `Connection::open_tuned`, and
@@ -25,7 +25,7 @@
 //! A "hello world" publisher:
 //!
 //! ```rust,no_run
-//! use amiquip::{Connection, Exchange, Publish, Result};
+//! use bnuuy::{Connection, Exchange, Publish, Result};
 //!
 //! fn main() -> Result<()> {
 //!     // Open connection.
@@ -49,7 +49,7 @@
 //! ```rust,no_run
 //! // Port of https://www.rabbitmq.com/tutorials/tutorial-one-python.html. Run this
 //! // in one shell, and run the hello_world_publish example in another.
-//! use amiquip::{Connection, ConsumerMessage, ConsumerOptions, QueueDeclareOptions, Result};
+//! use bnuuy::{Connection, ConsumerMessage, ConsumerOptions, QueueDeclareOptions, Result};
 //!
 //! fn main() -> Result<()> {
 //!     // Open connection.
@@ -86,7 +86,7 @@
 //! Both of these examples are ports of the [RabbitMQ Hello World
 //! tutorial](https://www.rabbitmq.com/tutorials/tutorial-one-python.html). Additional examples,
 //! including ports of the other tutorials from that series, [are also
-//! available](https://github.com/jgallagher/amiquip/tree/master/examples).
+//! available](https://github.com/eievui5/bnuuy/tree/master/examples).
 //!
 //! # Design Details
 //!
@@ -101,8 +101,8 @@
 //! Heartbeats are entirely managed by the I/O thread; if heartbeats are enabled and the I/O thread
 //! fails to receive communication from the server for too long, it will close the connection.
 //!
-//! amiquip uses the [log](https://crates.io/crates/log) crate internally. At the `trace` log
-//! level, amiquip is quite noisy, but this may be valuable in debugging connection problems.
+//! bnuuy uses the [log](https://crates.io/crates/log) crate internally. At the `trace` log
+//! level, bnuuy is quite noisy, but this may be valuable in debugging connection problems.
 //!
 //! ## Thread Support
 //!
@@ -123,7 +123,7 @@
 //! consumers from the thread where work will be done; e.g.,
 //!
 //! ```rust
-//! use amiquip::{Connection, QueueDeclareOptions, ConsumerOptions, Result};
+//! use bnuuy::{Connection, QueueDeclareOptions, ConsumerOptions, Result};
 //! use std::thread;
 //!
 //! fn run_connection(mut connection: Connection) -> Result<()> {
@@ -155,13 +155,13 @@
 //!
 //! * Connection recovery. If something goes wrong with a connection, it will be torn down, and
 //! errors will be returned from calls on the connection and any other handles (channels,
-//! consumers, etc.). A connection recovery strategy could be implemented on top of amiquip.
+//! consumers, etc.). A connection recovery strategy could be implemented on top of bnuuy.
 //! * Channel-level flow control. RabbitMQ, as of version 3.7.14 in March 2019, [does not
 //! support](https://www.rabbitmq.com/specification.html#rules) clients requesting channel flow
 //! control, and it does not send channel flow control messages to clients (using TCP backpressure
 //! instead).
 //! * Setting up a [`Consumer`](struct.Consumer.html) with a user-provided consumer tag. If this is
-//! something you need, please [file an issue](https://github.com/jgallagher/amiquip/issues).
+//! something you need, please [file an issue](https://github.com/eievui5/bnuuy/issues).
 //! * `nowait` variants of [`Queue::consume`](struct.Queue.html#method.consume) and
 //! [`Consumer::cancel`](struct.Consumer.html#method.cancel). It is unlikely support for these will
 //! be added, as the synchronous versions are used to set up internal channels for consumer
@@ -183,7 +183,7 @@ mod get;
 mod heartbeats;
 mod io_loop;
 mod queue;
-mod return_;
+mod ret;
 mod serialize;
 mod stream;
 
@@ -198,7 +198,7 @@ pub use errors::{Error, Result};
 pub use exchange::{Exchange, ExchangeDeclareOptions, ExchangeType, Publish};
 pub use get::Get;
 pub use queue::{Queue, QueueDeclareOptions, QueueDeleteOptions};
-pub use return_::Return;
+pub use ret::Return;
 pub use stream::IoStream;
 
 #[cfg(feature = "native-tls")]

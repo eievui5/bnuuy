@@ -12,7 +12,6 @@ use amq_protocol::protocol::AMQPClass;
 use crossbeam_channel::Receiver as CrossbeamReceiver;
 use crossbeam_channel::SendError;
 use crossbeam_channel::Sender as CrossbeamSender;
-use log::{debug, error, trace, warn};
 use mio::{Event, Evented, Events, Poll, PollOpt, Ready, Token};
 use mio_extras::channel::sync_channel as mio_sync_channel;
 use mio_extras::channel::Receiver as MioReceiver;
@@ -22,6 +21,7 @@ use std::io;
 use std::sync::mpsc::TryRecvError;
 use std::thread::{Builder, JoinHandle};
 use std::time::{Duration, Instant};
+use tracing::{debug, error, trace, warn};
 
 #[cfg(feature = "native-tls")]
 use crate::stream::HandshakeStream;
@@ -181,7 +181,7 @@ impl IoLoop {
         let (ch0_slot, ch0_handle) = Channel0Slot::new(self.inner.mio_channel_bound);
 
         let join_handle = Builder::new()
-            .name("amiquip-io".to_string())
+            .name("bnuuy-io".to_string())
             .spawn(move || self.thread_main(stream, options, handshake_done_tx, ch0_slot, false))
             .context(ForkFailedSnafu)?;
 
@@ -208,7 +208,7 @@ impl IoLoop {
         let (ch0_slot, ch0_handle) = Channel0Slot::new(self.inner.mio_channel_bound);
 
         let join_handle = Builder::new()
-            .name("amiquip-io".to_string())
+            .name("bnuuy-io".to_string())
             .spawn(move || self.thread_main_tls(stream, options, handshake_done_tx, ch0_slot))
             .context(ForkFailedSnafu)?;
 
@@ -349,7 +349,7 @@ impl IoLoop {
             HandshakeState::Done(tune_ok, server_properties) => Ok((tune_ok, server_properties)),
             HandshakeState::ServerClosing(close) => ServerClosedConnectionSnafu {
                 code: close.reply_code,
-                message: close.reply_text,
+                message: close.reply_text.to_string(),
             }
             .fail(),
         }
@@ -416,7 +416,7 @@ impl IoLoop {
             ConnectionState::Steady(_) => unreachable!(),
             ConnectionState::ServerClosing(close) => ServerClosedConnectionSnafu {
                 code: close.reply_code,
-                message: close.reply_text,
+                message: close.reply_text.to_string(),
             }
             .fail(),
             ConnectionState::ClientException => ClientExceptionSnafu.fail(),
@@ -721,7 +721,7 @@ impl Inner {
                         // enqueuing up a heartbeat frame
                         if self.outbuf.is_empty() {
                             debug!("sending heartbeat");
-                            self.outbuf.push_heartbeat();
+                            self.outbuf.push_heartbeat(0);
                         } else {
                             warn!("tx heartbeat fired, but already have queued data to write - possible socket problem");
                         }

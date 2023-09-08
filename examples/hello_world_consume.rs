@@ -1,9 +1,9 @@
-// Port of https://www.rabbitmq.com/tutorials/tutorial-one-python.html. Run this
+// Port of /tutorial-one-python.html. Run this
 // in one shell, and run the hello_world_publish example in another.
-use amiquip::{Connection, ConsumerMessage, ConsumerOptions, QueueDeclareOptions, Result};
+use bnuuy::{Connection, ConsumerMessage, ConsumerOptions, QueueDeclareOptions, Result};
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;
@@ -22,7 +22,7 @@ fn main() -> Result<()> {
         match message {
             ConsumerMessage::Delivery(delivery) => {
                 let body = String::from_utf8_lossy(&delivery.body);
-                println!("({:>3}) Received [{}]", i, body);
+                tracing::info!("({:>3}) Received [{}]", i, body);
                 consumer.ack(delivery)?;
             }
             other => {

@@ -1,12 +1,12 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-four-python.html. Start this
 // example in one shell, then run the routing_emit_log_direct example in another.
-use amiquip::{
+use bnuuy::{
     Connection, ConsumerMessage, ConsumerOptions, ExchangeDeclareOptions, ExchangeType, FieldTable,
     QueueDeclareOptions, Result,
 };
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;
@@ -43,7 +43,7 @@ fn main() -> Result<()> {
 
     for severity in args.skip(1) {
         // Bind to each requested log severity.
-        queue.bind(&exchange, severity, FieldTable::new())?;
+        queue.bind(&exchange, severity, FieldTable::default())?;
     }
 
     // Start a consumer. Use no_ack: true so the server doesn't wait for us to ack

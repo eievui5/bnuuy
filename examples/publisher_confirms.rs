@@ -1,6 +1,4 @@
-use amiquip::{
-    Channel, ConfirmSmoother, Connection, Exchange, Publish, QueueDeclareOptions, Result,
-};
+use bnuuy::{Channel, ConfirmSmoother, Connection, Exchange, Publish, QueueDeclareOptions, Result};
 
 fn publish_messages_with_confirmation(
     channel: &Channel,

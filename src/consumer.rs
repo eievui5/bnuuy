@@ -14,9 +14,9 @@ use std::cell::Cell;
 /// [consumer priority](https://www.rabbitmq.com/consumer-priority.html):
 ///
 /// ```rust
-/// # use amiquip::{AmqpValue, ConsumerOptions, FieldTable};
-/// let mut arguments = FieldTable::new();
-/// arguments.insert("x-priority".to_string(), AmqpValue::ShortInt(10));
+/// # use bnuuy::{AmqpValue, ConsumerOptions, FieldTable};
+/// let mut arguments = FieldTable::default();
+/// arguments.insert("x-priority".into(), AmqpValue::ShortInt(10));
 /// let options = ConsumerOptions {
 ///     arguments,
 ///     ..ConsumerOptions::default()
@@ -77,8 +77,8 @@ pub enum ConsumerMessage {
 /// # Example
 ///
 /// ```rust
-/// use amiquip::{Consumer, ConsumerMessage, Result};
-/// # use amiquip::Delivery;
+/// use bnuuy::{Consumer, ConsumerMessage, Result};
+/// # use bnuuy::Delivery;
 ///
 /// # fn handle_delivery(_: Delivery) {}
 /// // Receive (at least) n messages on the consumer, then cancel it.
@@ -164,7 +164,7 @@ impl Consumer<'_> {
             return Ok(());
         }
         self.cancelled.set(true);
-        self.channel.basic_cancel(&self)
+        self.channel.basic_cancel(self)
     }
 
     /// Calls [`Delivery::ack`](struct.Delivery.html#method.ack) on `delivery` using the channel

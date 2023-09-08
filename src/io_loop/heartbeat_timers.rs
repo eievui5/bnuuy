@@ -1,7 +1,7 @@
 use crate::heartbeats::Heartbeat;
-use log::trace;
 use mio_extras::timer::Timer;
 use std::time::Duration;
+use tracing::trace;
 
 pub(super) use crate::heartbeats::HeartbeatState;
 

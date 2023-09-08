@@ -1,7 +1,7 @@
-use log::trace;
 use mio_extras::timer::{Timeout, Timer};
 use std::fmt::Debug;
 use std::time::{Duration, Instant};
+use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum HeartbeatState {

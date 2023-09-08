@@ -1,12 +1,12 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-two-python.html. Start one
 // or more work_queues_worker examples in other shells, then run this example.
-use amiquip::{AmqpProperties, Connection, Exchange, Publish, QueueDeclareOptions, Result};
+use bnuuy::{AmqpProperties, Connection, Exchange, Publish, QueueDeclareOptions, Result};
 use std::env;
 
 const TASK_QUEUE: &str = "task_queue";
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;

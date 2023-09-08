@@ -10,11 +10,11 @@ use amq_protocol::protocol::connection::Close as ConnectionClose;
 use amq_protocol::protocol::connection::CloseOk as ConnectionCloseOk;
 use crossbeam_channel::Receiver as CrossbeamReceiver;
 use crossbeam_channel::Sender as CrossbeamSender;
-use log::error;
 use mio_extras::channel::SyncSender as MioSyncSender;
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::result::Result as StdResult;
+use tracing::error;
 
 pub(super) struct IoLoopHandle {
     channel_id: u16,
@@ -73,7 +73,9 @@ impl IoLoopHandle {
         self.send(IoLoopMessage::Send(buf))?;
         match self.recv()? {
             ChannelMessage::GetOk(get) => Ok(*get),
-            ChannelMessage::Method(_) | ChannelMessage::ConsumeOk(_, _) => FrameUnexpectedSnafu.fail(),
+            ChannelMessage::Method(_) | ChannelMessage::ConsumeOk(_, _) => {
+                FrameUnexpectedSnafu.fail()
+            }
         }
     }
 
@@ -105,8 +107,10 @@ impl IoLoopHandle {
     fn call_message<T: TryFromAmqpClass>(&mut self, message: IoLoopMessage) -> Result<T> {
         self.send(message)?;
         match self.recv()? {
-            ChannelMessage::Method(method) => T::try_from(method),
-            ChannelMessage::ConsumeOk(_, _) | ChannelMessage::GetOk(_) => FrameUnexpectedSnafu.fail(),
+            ChannelMessage::Method(method) => T::try_from_class(method),
+            ChannelMessage::ConsumeOk(_, _) | ChannelMessage::GetOk(_) => {
+                FrameUnexpectedSnafu.fail()
+            }
         }
     }
 

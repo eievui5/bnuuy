@@ -1,10 +1,10 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-three-python.html. Start one
 // or more pubsub_receive_logs examples in other shells, then run this example.
-use amiquip::{Connection, ExchangeDeclareOptions, ExchangeType, Publish, Result};
+use bnuuy::{Connection, ExchangeDeclareOptions, ExchangeType, Publish, Result};
 use std::env;
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;

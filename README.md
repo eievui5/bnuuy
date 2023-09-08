@@ -1,10 +1,14 @@
-# amiquip
+# bnuuy
 
-[![dependency status](https://deps.rs/repo/github/jgallagher/amiquip/status.svg)](https://deps.rs/repo/github/jgallagher/amiquip)
-[![Latest Version](https://img.shields.io/crates/v/amiquip.svg)](https://crates.io/crates/amiquip)
-[![Docs](https://docs.rs/amiquip/badge.svg)](https://docs.rs/amiquip)
+[![dependency status](https://deps.rs/repo/github/eievui5/bnuuy/status.svg)](https://deps.rs/repo/github/eievui5/bnuuy)
+[![Latest Version](https://img.shields.io/crates/v/bnuuy.svg)](https://crates.io/crates/bnuuy)
+[![Docs](https://docs.rs/bnuuy/badge.svg)](https://docs.rs/bnuuy)
 
-amiquip is a RabbitMQ client written in pure Rust.
+bnuuy is a fork of amiquip, a RabbitMQ client written in pure Rust.
+
+This fork was made because the amiquip repo seems to have been abandoned for years, despite new PRs and issues being opened.
+
+Alternatives like amqprs lack a nice api and good documentation, despite having more recent maintainence, which is why this project is worth reviving.
 
 # Usage
 
@@ -12,27 +16,27 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-amiquip = "0.4"
+bnuuy = "1.0.0"
 ```
 
-For usage, see the [documentation](https://docs.rs/amiquip/) and
-[examples](https://github.com/jgallagher/amiquip/tree/master/examples).
+For usage, see the [documentation](https://docs.rs/bnuuy/) and
+[examples](https://github.com/eievui5/bnuuy/tree/master/examples).
 
 ## Minimum Support Rust Version
 
-The minimum supported Rust version for amiquip 0.4.2 is currently Rust 1.46.0,
+The minimum supported Rust version for bnuuy 1.0.0 is currently Rust 1.56.0,
 but that may change with a patch release (and could change with a patch release
 to a dependency without our knowledge).
 
 ## TLS Support
 
-By default, amiquip enables TLS support via the
+By default, bnuuy enables TLS support via the
 [native-tls](https://crates.io/crates/native-tls) crate. You can disable
 support for TLS by turning off default features:
 
 ```toml
 [dependencies]
-amiquip = { version = "0.4", default-features = false }
+bnuuy = { version = "1.0.0", default-features = false }
 ```
 
 If you disable TLS support, the methods `Connection::open`,
@@ -44,7 +48,7 @@ support unencrypted connections.
 
 ## Integration Tests
 
-amiquip contains integration tests that require a RabbitMQ server. To run these,
+bnuuy contains integration tests that require a RabbitMQ server. To run these,
 set the `AMIQUIP_TEST_URL` environment variable to an `amqp://` or `amqps://` URL
 before running `cargo test`. For example, if you have a RabbitMQ instance running
 with the default guest account on your development machine:
@@ -78,5 +82,5 @@ at your option.
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in amiquip by you, as defined in the Apache-2.0 license, shall be
+for inclusion in bnuuy by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.

@@ -1,6 +1,6 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-six-python.html. Start this
 // example in one shell, then the rpc_client example in another.
-use amiquip::{
+use bnuuy::{
     AmqpProperties, Connection, ConsumerMessage, ConsumerOptions, Exchange, Publish,
     QueueDeclareOptions, Result,
 };
@@ -14,7 +14,7 @@ fn fib(n: u64) -> u64 {
 }
 
 fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     // Open connection.
     let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;
@@ -57,7 +57,7 @@ fn main() -> Result<()> {
 
                 exchange.publish(Publish::with_properties(
                     response.as_bytes(),
-                    reply_to,
+                    reply_to.to_string(),
                     AmqpProperties::default().with_correlation_id(corr_id),
                 ))?;
                 consumer.ack(delivery)?;

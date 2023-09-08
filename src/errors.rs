@@ -3,20 +3,21 @@ use snafu::Snafu;
 use std::{io, result};
 use url::Url;
 
-/// A type alias for handling errors throughout amiquip.
+/// A type alias for handling errors throughout bnuuy.
 pub type Result<T, E = Error> = result::Result<T, E>;
 
-/// Specific error cases returned by amiquip.
+/// Specific error cases returned by bnuuy.
 #[derive(Snafu, Debug)]
 #[snafu(visibility(pub(crate)))]
+#[non_exhaustive]
 pub enum Error {
     /// URL parsing failed.
     #[snafu(display("could not parse url: {}", source))]
     UrlParseError { source: url::ParseError },
 
-    /// A TLS connection was requested (e.g., via URL), but the amiquip was built without TLS
+    /// A TLS connection was requested (e.g., via URL), but the bnuuy was built without TLS
     /// support.
-    #[snafu(display("amiquip built without TLS support"))]
+    #[snafu(display("bnuuy built without TLS support"))]
     TlsFeatureNotEnabled,
 
     /// An insecure URL was supplied to [`Connection::open`](struct.Connection.html#method.open),
@@ -206,7 +207,7 @@ pub enum Error {
     ClientClosedChannel,
 
     /// The I/O loop attempted to send a message to a caller that did not exist. This
-    /// indicates either a bug in amiquip or a connection that is in a bad state and in the process
+    /// indicates either a bug in bnuuy or a connection that is in a bad state and in the process
     /// of tearing down.
     #[snafu(display("i/o loop thread tried to communicate with a nonexistent client"))]
     EventLoopClientDropped,
@@ -269,9 +270,6 @@ pub enum Error {
         channel_id: u16,
         consumer_tag: String,
     },
-
-    #[doc(hidden)]
-    __Nonexhaustive,
 }
 
 #[cfg(test)]

@@ -1,6 +1,7 @@
 // Port of https://www.rabbitmq.com/tutorials/tutorial-six-python.html. Start the
 // rpc_server example in one shell, then run this example in another.
-use amiquip::{
+use amq_protocol::types::ShortString;
+use bnuuy::{
     AmqpProperties, Channel, Connection, Consumer, ConsumerMessage, ConsumerOptions, Exchange,
     Publish, Queue, QueueDeclareOptions, Result,
 };
@@ -36,12 +37,12 @@ impl<'a> FibonacciRpcClient<'a> {
     }
 
     fn call(&self, n: u64) -> Result<String> {
-        let correlation_id = format!("{}", Uuid::new_v4());
+        let correlation_id: ShortString = format!("{}", Uuid::new_v4()).into();
         self.exchange.publish(Publish::with_properties(
             format!("{}", n).as_bytes(),
             "rpc_queue",
             AmqpProperties::default()
-                .with_reply_to(self.queue.name().to_string())
+                .with_reply_to(self.queue.name().into())
                 .with_correlation_id(correlation_id.clone()),
         ))?;
         for message in self.consumer.receiver().iter() {
