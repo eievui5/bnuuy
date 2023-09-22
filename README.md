@@ -4,9 +4,9 @@
 [![Latest Version](https://img.shields.io/crates/v/bnuuy.svg)](https://crates.io/crates/bnuuy)
 [![Docs](https://docs.rs/bnuuy/badge.svg)](https://docs.rs/bnuuy)
 
-bnuuy is a fork of amiquip, a RabbitMQ client written in pure Rust.
+bnuuy is a fork of bnuuy, a RabbitMQ client written in pure Rust.
 
-This fork was made because the amiquip repo seems to have been abandoned for years, despite new PRs and issues being opened.
+This fork was made because the bnuuy repo seems to have been abandoned for years, despite new PRs and issues being opened.
 
 Alternatives like amqprs lack a nice api and good documentation, despite having more recent maintainence, which is why this project is worth reviving.
 
@@ -31,7 +31,8 @@ to a dependency without our knowledge).
 ## TLS Support
 
 By default, bnuuy enables TLS support via the
-[native-tls](https://crates.io/crates/native-tls) crate. You can disable
+[native-tls](https://crates.io/crates/native-tls) crate. You can switch to using [rusttls](https://github.com/rustls/rustls) through the `rusttls-tls` feature. You can disable
+
 support for TLS by turning off default features:
 
 ```toml
