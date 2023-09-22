@@ -17,9 +17,9 @@ all-features = true
 [features]
 default = ["native-tls"]
 
-native-tls = ["native-tls-crate", "__tls"]
+native-tls = ["native-tls-crate", "__tls", "amq-protocol/native-tls"]
 
-rustls-tls = ["rustls-tls-webpki-roots"]
+rustls-tls = ["rustls-tls-webpki-roots", "amq-protocol/rustls"]
 rustls-tls-manual-roots = ["__rustls"]
 rustls-tls-webpki-roots = ["rustls-connector/webpki-roots-certs", "webpki-roots", "__rustls"]
 rustls-tls-native-roots = ["rustls-connector/native-certs", "rustls-native-certs", "__rustls"]
@@ -31,7 +31,7 @@ __tls = []
 snafu = { version = "0.7", default-features = false, features = ["std"]}
 input_buffer = "0.5"
 bytes = "1.4"
-amq-protocol = "7.1"
+amq-protocol = { version = "7.1", default-features = false }
 mio = "0.6"
 mio-extras = "2.0"
 cookie-factory = "0.3"
