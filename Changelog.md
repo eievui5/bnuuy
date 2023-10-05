@@ -1,3 +1,7 @@
+# Version 1.1.0 (2023-10-05)
+
+- Merged Rustls support from amiquip repository.
+
 # Version 1.0.0 (2023-09-08)
 
 This is a fork of amiquip, as the repo seems to have been abandoned for years despite new PRs and issues being opened.

@@ -1,6 +1,6 @@
 [package]
 name = "bnuuy"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["John Gallagher <johnkgallagher@gmail.com>", "Evie"]
 edition = "2021"
 build = "build.rs"
