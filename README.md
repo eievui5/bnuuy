@@ -4,11 +4,7 @@
 [![Latest Version](https://img.shields.io/crates/v/bnuuy.svg)](https://crates.io/crates/bnuuy)
 [![Docs](https://docs.rs/bnuuy/badge.svg)](https://docs.rs/bnuuy)
 
-bnuuy is a fork of bnuuy, a RabbitMQ client written in pure Rust.
-
-This fork was made because the bnuuy repo seems to have been abandoned for years, despite new PRs and issues being opened.
-
-Alternatives like amqprs lack a nice api and good documentation, despite having more recent maintainence, which is why this project is worth reviving.
+bnuuy is a fork of amiquip, a RabbitMQ client written in pure Rust.
 
 # Usage
 
